@@ -106,6 +106,11 @@ function addHtmlproject(projectName, id) {
             const parentDiv = element.parentElement;
             const grandParentDiv = parentDiv.parentElement;
             const firstChild = grandParentDiv.firstChild;
+            
+            if (grandParentDiv.querySelector('input')) {
+                return;
+            }
+            
             firstChild.style.display = 'none';
 
             const newProjectNameInput = document.createElement('input');
@@ -177,7 +182,6 @@ function getIndex(divId) {
 
     return -1;
 }
-
 
 
 // Load projects from localStorage when the DOM is fully loaded

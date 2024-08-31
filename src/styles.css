@@ -207,5 +207,14 @@ aside {
     left: calc(max(215px, 13%));
 }
 
+#section-bottom #content .list-container input:focus {
+    font-size: 0.9em;
+    border-radius: 5px;
+    border: 0.1px;
+    padding: 2px;
+    color: #5F5E5B;
+    outline: none;
+}
+
 
 
