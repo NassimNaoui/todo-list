@@ -204,7 +204,6 @@ aside {
     position: absolute;
     transform: translateX(-50%);
     z-index: 1;
-    top: 45%;
     left: calc(max(215px, 13%));
 }
 

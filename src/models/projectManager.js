@@ -2,34 +2,71 @@ import Project from "./project";
 
 export default class ProjectManager {
     constructor() {
-        this.projects = [];
+        this.projects = this.loadProjectsFromLocalStorage() || [];
     }
 
-    addProject(projectName) {
-        const newProject = new Project(projectName);
-        this.projects.push(newProject)
+    // Ajouter un projet
+    addProject(projectName, id) {
+        const newProject = new Project(projectName, id);
+        this.projects.push(newProject);
+        this.saveProjectsToLocalStorage();
     }
 
+    // Supprimer un projet par index
     removeProject(index) {
-        if(index >= 0 && index < this.projects.length) {
+        if (index >= 0 && index < this.projects.length) {
             this.projects.splice(index, 1);
+            this.saveProjectsToLocalStorage();
         }
     }
 
+    // Supprimer un projet par ID
+    removeProjectById(id) {
+        const index = this.projects.findIndex(project => project.id === id);
+        if (index !== -1) {
+            this.projects.splice(index, 1);
+            this.saveProjectsToLocalStorage();
+        }
+    }
+
+    // Récupérer un projet par index
     getProject(index) {
         return this.projects[index];
     }
 
-    updateProject(index,upDatedData) {
+    // Récupérer un projet par ID
+    getProjectById(id) {
+        return this.projects.find(project => project.id === id);
+    }
+
+    // Mettre à jour un projet par index
+    updateProject(index, updatedData) {
         const project = this.projects[index];
         if (project) {
-            if (upDatedData.projectName) {
-                project.updateProjectName(upDatedData.projectName);
+            if (updatedData.projectName) {
+                project.updateProjectName(updatedData.projectName);
             }
+            this.saveProjectsToLocalStorage();
         }
     }
 
+    // Récupérer tous les projets
     getAllProjects() {
         return this.projects;
+    }
+
+    // Sauvegarder les projets dans le localStorage
+    saveProjectsToLocalStorage() {
+        localStorage.setItem('projects', JSON.stringify(this.projects));
+    }
+
+    // Charger les projets depuis le localStorage
+    loadProjectsFromLocalStorage() {
+        const savedProjects = localStorage.getItem('projects');
+        if (savedProjects) {
+            return JSON.parse(savedProjects).map(projectData => 
+                new Project(projectData.projectName, projectData.id));
+        }
+        return [];
     }
 }

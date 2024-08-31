@@ -1,8 +1,9 @@
 import List from "./list";
 
 export default class Project {
-    constructor(projectName) {
+    constructor(projectName,id) {
         this.projectName = projectName;
+        this.id = id
         this.lists = [];
     }
 

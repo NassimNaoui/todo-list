@@ -3,90 +3,184 @@ import { addOptionsIcon } from "../UI/imgUploader";
 
 const myProjectManager = new ProjectManager();
 
-function addNewProject (projectName) {
-
-    // Ajouter un projet
-    myProjectManager.addProject(projectName);
-    
-    console.log(myProjectManager.getAllProjects());
-
-    return projectName;
+// Function to add a new project
+function addNewProject(projectName) {
+    const id = Date.now();
+    myProjectManager.addProject(projectName, id);
+    saveProjectsToLocalStorage(); // Save to localStorage after adding
+    return [projectName, id];
 }
 
+// Save projects to localStorage
+function saveProjectsToLocalStorage() {
+    console.log('Saving projects to localStorage');
+    localStorage.setItem('projects', JSON.stringify(myProjectManager.getAllProjects()));
+}
+
+// Load projects from localStorage
+function loadProjectsFromLocalStorage() {
+    console.log('Loading projects from localStorage');
+    const storedProjects = JSON.parse(localStorage.getItem('projects'));
+    if (storedProjects) {
+        storedProjects.forEach(project => {
+            addHtmlproject(project.projectName, project.id);
+        });
+    }
+}
 
 // Function for adding HTML Code in Aside bottom section
-
-const sectionBottomContainer = document.getElementById("content")
-
-function addHtmlproject (projectName) {
-    
-    //Adding the list container
+function addHtmlproject(projectName, id) {
+    console.log(`Adding HTML for project: ${projectName}, ID: ${id}`);
     const newListContainer = document.createElement('div');
     newListContainer.className = "list-container";
-    
+
+    const sectionBottomContainer = document.getElementById("content");
+    if (!sectionBottomContainer) {
+        console.error('Element with id "content" not found.');
+        return;
+    }
     sectionBottomContainer.appendChild(newListContainer);
-    
-    //Adding the 2 children into the list container
+
     const divContent = document.createElement('div');
     divContent.textContent = projectName;
-    
+    divContent.id = id;
+    divContent.classList.add("project-name")
+
     const iconContainer = document.createElement('div');
-    iconContainer.id = "options-icon"
-    iconContainer.className = "icon"
-    
-    newListContainer.appendChild(divContent)
-    newListContainer.appendChild(iconContainer)
-    
-    //ading 2 children into the iconContainer
-    addOptionsIcon();
+    iconContainer.id = "options-icon";
+    iconContainer.className = "icon";
+
+    newListContainer.appendChild(divContent);
+    newListContainer.appendChild(iconContainer);
+
+    // Adding 2 children into the iconContainer
+    addOptionsIcon(iconContainer);
+
+    const htmlStringCard = `
+        <div id="options-card">
+            <ul id="rename-option">Rename</ul>
+            <ul id="delete-option">Delete</ul>
+        </div>`;
+    newListContainer.insertAdjacentHTML("beforeend", htmlStringCard);
+
+    const optionsButton = iconContainer;
+    const optionsCard = newListContainer.querySelector("#options-card");
+    // const listContainerHovered = document.getElementById("section-bottom")
+
+    let isOptionsCardVisible = false;
+
+    optionsButton.addEventListener('click', function (event) {
+        event.stopPropagation();
+
+        isOptionsCardVisible = !isOptionsCardVisible;
+        optionsCard.style.display = isOptionsCardVisible ? 'flex' : 'none';
+
+        // listContainerHovered.forEach(element => {
+        //     element.style.pointerEvents = 'none';
+        // });
+        
+        // optionsCard.style.pointerEvents = 'auto';
+
+    });
+
+    document.body.addEventListener('click', function () {
+        if (isOptionsCardVisible) {
+            optionsCard.style.display = 'none';
+            isOptionsCardVisible = false;
+            // newListContainer.style.pointerEvents = 'auto';
+        }
+    });
+
+    optionsCard.addEventListener('click', function (event) {
+        event.stopPropagation();
+    });
+
+
+    //test
+
+    const renameButton = document.querySelectorAll("#rename-option")
+
+    renameButton.forEach(element => {
+        element.addEventListener("click", function () {
+            
+            const parentDiv = element.parentElement;
+            const grandParentDiv = parentDiv.parentElement;
+            const firstChild = grandParentDiv.firstChild;
+            firstChild.style.display = 'none';
+
+            const newProjectNameInput = document.createElement('input');
+            newProjectNameInput.type = 'text';
+            newProjectNameInput.value = firstChild.textContent.trim();
+            grandParentDiv.insertBefore(newProjectNameInput, grandParentDiv.firstChild);
+
+            newProjectNameInput.focus();
+
+            newProjectNameInput.addEventListener('kewdown', function(event) {
+                if (event.key === 'Enter') {
+                    updateProjectNameDom()
+                }
+            });
+
+            newProjectNameInput.addEventListener('blur', updateProjectNameDom);
+
+            function updateProjectNameDom() {
+                const newName = newProjectNameInput.value;
+                if (newName.length === 0) {
+                    newProjectNameInput.remove();
+                    firstChild.style.display = 'flex';
+                } else {
+                    myProjectManager.updateProject(getIndex(firstChild.id),{projectName:newName});
+                    firstChild.textContent = newName;
+                    newProjectNameInput.remove();
+                    firstChild.style.display = 'flex';
+                    console.log(myProjectManager.getAllProjects())
+                }
+            }
+        })
+    });
+
+    const deleteButton = document.querySelectorAll("#delete-option")
+
+    deleteButton.forEach(element => {
+        element.addEventListener("click", function () {
+            const parentDiv = element.parentElement;
+            const grandParentDiv = parentDiv.parentElement;
+            const firstChild = grandParentDiv.firstChild;
+            myProjectManager.removeProject(getIndex(firstChild.id))
+            grandParentDiv.remove();
+            console.log(myProjectManager.getAllProjects())
+        })
+    });
+
 }
 
-// Adding function to the add button icon
+// Event listener for adding a new project
+const addButton = document.getElementById("add-icon");
 
-const addButton = document.getElementById("add-icon")
+addButton.addEventListener('click', function () {
+    const infoproject = addNewProject("New list");
+    const projectName = infoproject[0];
+    const projectId = infoproject[1];
 
-addButton.addEventListener('click', function() {
-    
-    const newProject = document.createElement("div");
-    newProject.textContent = addNewProject("New list")
-    
-    addHtmlproject(newProject.textContent);
-    
-})
-
-// Displaying options and undiplaying
-
-const optionsButton = document.getElementById("options-icon");
-const optionsCard = document.getElementById("options-card");
-const bodyElement = document.querySelector("body");
-
-// Variable pour vérifier si le pop-up est visible
-let isOptionsCardVisible = false;
-
-optionsButton.addEventListener('click', function(event) {
-    // Empêche l'événement de se propager au body
-    event.stopPropagation();
-
-    // Toggle l'affichage du pop-up
-    isOptionsCardVisible = !isOptionsCardVisible;
-    optionsCard.style.display = isOptionsCardVisible ? 'flex' : 'none';
-
-    // Delete Hover effect
-    
+    addHtmlproject(projectName, projectId);
 });
 
-bodyElement.addEventListener('click', function() {
-    if (isOptionsCardVisible) {
-        optionsCard.style.display = 'none';
-        isOptionsCardVisible = false;
+// Get the index of the object by the ID in the DOM
+function getIndex(divId) {
+    const projects = myProjectManager.getAllProjects();
+
+    for (let i = 0; i < projects.length; i++) {
+        if (projects[i].id == divId) {
+            return i;
+        }
     }
-});
 
-// Empêche le clic sur la carte d'options de fermer le pop-up
-optionsCard.addEventListener('click', function(event) {
-    event.stopPropagation();
-});
+    return -1;
+}
 
 
+
+// Load projects from localStorage when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', loadProjectsFromLocalStorage);
 
 

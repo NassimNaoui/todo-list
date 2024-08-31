@@ -51,15 +51,15 @@ addIconContainer.appendChild(titleAddIcon);
 
 // options icon
 
-export function addOptionsIcon () {
+export function addOptionsIcon (iconContainer) {
     const imageOptions = document.createElement("img");
     imageOptions.src = optionsIcon;
     
-    const optionsIconContainer = document.getElementById("options-icon");
-    optionsIconContainer.appendChild(imageOptions)
+    iconContainer.appendChild(imageOptions)
 
     const titleOptionsIcon = document.createElement("div")
     titleOptionsIcon.textContent = "Rename,delete.";
-    titleOptionsIcon.classList.add('hover-text')
-    optionsIconContainer.appendChild(titleOptionsIcon);
+    titleOptionsIcon.classList.add('hover-text');
+
+    iconContainer.appendChild(titleOptionsIcon);
 }
