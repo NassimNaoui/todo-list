@@ -6,8 +6,6 @@ import "./DOM/domManager"
 
 
 
-// Créer une instance de ProjectManager
-const myProjectManager = new ProjectManager();
 
 
 

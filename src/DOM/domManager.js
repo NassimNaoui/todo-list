@@ -1,1 +1,2 @@
-import "./asideContent"
+import "./asideContent";
+import "./mainContent";

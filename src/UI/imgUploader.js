@@ -4,6 +4,7 @@ import somedayIcon from "./icons/somday.png"
 import doneIcon from "./icons/done.png"
 import addIcon from "./icons/add.png"
 import optionsIcon from "./icons/options.png"
+import emptyImage from "./icons/empty.png"
 
 
 
@@ -63,3 +64,17 @@ export function addOptionsIcon (iconContainer) {
 
     iconContainer.appendChild(titleOptionsIcon);
 }
+
+
+// export function addEmptyImg (divParent) {
+//     const emptyImg = document.createElement("img");
+//     emptyImg.src = emptyImage;
+//     emptyImg.classList.add("empty-img")
+
+//     const imgContainer = document.createElement("div");
+//     imgContainer.classList.add("empty-img-container");
+
+//     divParent.appendChild(imgContainer)
+    
+//     imgContainer.appendChild(emptyImg)
+// }
