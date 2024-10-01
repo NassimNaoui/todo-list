@@ -33,6 +33,7 @@ ul:hover {
 
 aside {
   display: flex;
+  position: sticky;
   flex-direction: column;
   width: var(--aside-width);
   min-width: 210px;
@@ -233,6 +234,8 @@ aside {
 main {
   width: calc(100% - var(--aside-width));
   height: 100%;
+  flex-grow: 1; /* Le main prend tout l'espace restant */
+  overflow-y: auto; /* Permettre le défilement vertical dans le main */
 }
 
 #main-container {
@@ -242,7 +245,7 @@ main {
 #main-container #main-content {
   display: flex;
   flex-direction: column;
-  /* padding: 15px; */
+  color: #4e4d4b;
   width: 100%;
   height: 100%;
 }
@@ -250,8 +253,8 @@ main {
 /*block si liste non vide*/
 
 #main-container #main-content .page-title {
-  padding: 5px;
-  font-size: 1.8em;
+  padding: 20px;
+  font-size: 3.8em;
   font-weight: 600;
 }
 
@@ -263,30 +266,131 @@ main {
 #main-container #main-content .sub-list-layout {
   display: flex;
   flex-direction: row;
-  margin: 20px;
-  background-color: #5f5e5b;
-  height: 100px;
+  background-color: #f8f7f7;
+  border-radius: 12px 12px 0px 0px;
+  margin: 20px 20px 0px 20px;
+  height: 80px;
 }
 
 #main-container #main-content .sub-list-layout .sub-list-container-left {
-  background-color: #dfdfdf;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
   width: 5%;
 }
 
+.display-tasks {
+  border: solid black;
+  border-width: 0 4px 4px 0;
+  display: inline-block;
+  padding: 4px;
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  transition: 0.3s;
+}
+
+.down {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+  transition: 0.3s;
+}
+
+.-down {
+  rotate: 90deg;
+  transition: 0.3s;
+}
+
 #main-container #main-content .sub-list-layout .sub-list-container-middle {
-  background-color: #e0dab5;
   width: 90%;
 }
 
 .sub-list-name,
 .sub-list-description {
-  border: solid 0.1px black;
   height: 50%;
+  align-content: first baseline;
+}
+
+.sub-list-name {
+  font-size: 1.7em;
+  font-weight: 500;
+}
+
+.sub-list-description {
+  font-size: 1.2em;
+  font-weight: 200;
 }
 
 #main-container #main-content .sub-list-layout .sub-list-container-right {
-  background-color: #eacece;
   width: 5%;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+}
+
+.sub-list-progess-container {
+  height: 25px;
+  width: 25px;
+  border-radius: 100%;
+  background-color: #424240;
+}
+
+#main-container #main-content .sub-list-layout #options-card {
+  display: none;
+}
+
+#main-container #main-content .task-container {
+  display: flex;
+  flex-direction: column;
+  margin: 0px 20px 20px 20px;
+}
+
+#add-task-button {
+  text-align: center;
+  font-size: 1.1em;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-content: center;
+  padding: 3px;
+  gap: 5px;
+  cursor: pointer;
+  color: #a1a09e;
+  border-top: 0.1px solid #a1a09e;
+  border-bottom: 0.1px solid #a1a09e;
+}
+
+#add-task-button:hover {
+  background-color: #9e9d9a30;
+}
+
+.plus-layout {
+  border: 0.1px solid #a1a09e;
+  border-radius: 5px;
+  padding: 0px 7px 0px 7px;
+  font-size: 1.1em;
+  height: 25px;
+}
+
+#add-list-button {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  font-size: 1.2em;
+  font-weight: 500;
+  background-color: #f8f7f7;
+  border-radius: 8px;
+  margin: 20px 20px 100px 20px;
+  height: 40px;
+  gap: 5px;
+  cursor: pointer;
+}
+
+#add-list-button:hover {
+  background-color: #86858230;
 }
 
 /* Block si liste vide*/

@@ -22,26 +22,35 @@ export default function changeMainContent(page, id) {
   pageTitle.id = id;
   pageTitle.textContent = page;
 
-  if (mainContent.firstChild && mainContent.firstChild.textContent == page) {
-    return;
-  } else if (
-    mainContent.firstChild &&
-    mainContent.firstChild.textContent !== page
-  ) {
-    while (mainContent.firstChild) {
-      mainContent.removeChild(mainContent.firstChild);
-    }
-    mainContent.appendChild(pageTitle);
+  const projectId = parseInt(id);
+  const myProject = myProjectManager.getProjectById(projectId);
+  const myProjectLists = myProject.getAllList();
+  const listsIndex = myProjectLists.length;
+
+  if (mainContent.firstChild?.textContent === page) {
+    return; // Si le contenu actuel est déjà la bonne page, on ne fait rien
+  }
+
+  // On nettoie le contenu de mainContent
+  mainContent.innerHTML = "";
+  mainContent.appendChild(pageTitle);
+
+  // On ajoute soit un contenu vide soit le conteneur des listes
+  if (listsIndex === 0) {
     addEmptyContent(mainContent);
-    // addSublistContainer(mainContent);
   } else {
-    mainContent.appendChild(pageTitle);
-    addEmptyContent(mainContent);
-    // addSublistContainer(mainContent);
+    for (let i = 0; i < listsIndex; i++) {
+      addSublistContainer(
+        mainContent,
+        myProjectLists[i].name,
+        myProjectLists[i].description
+      );
+    }
+    addListbutton(mainContent);
   }
 }
 
-function addSublistContainer(divParent) {
+function addSublistContainer(divParent, name, description) {
   const subListContainer = document.createElement("div");
   subListContainer.classList.add("sub-list-container");
   divParent.appendChild(subListContainer);
@@ -69,6 +78,11 @@ function addSublistContainer(divParent) {
       for (let j = 0; j < subSideContainer[1].length; j++) {
         const subSubdiv = document.createElement("div");
         subSubdiv.classList.add(subSideContainer[1][j]);
+        if (subSubdiv.className === "sub-list-name") {
+          subSubdiv.textContent = name;
+        } else if (subSubdiv.className === "sub-list-description") {
+          subSubdiv.textContent = description;
+        }
         subDiv.appendChild(subSubdiv);
       }
     } else if (i === 2) {
@@ -96,9 +110,40 @@ function addSublistContainer(divParent) {
   taskContainer.classList.add("task-container");
   subListContainer.appendChild(taskContainer);
 
-  const addTaskButton = document.createElement("div");
-  addTaskButton.id = "add-task-button";
-  taskContainer.appendChild(addTaskButton);
+  const htmlStringAddTaskButton = `
+    <div id="add-task-button">
+      <div class="plus-layout">+</div>  
+      <div class="add-label"> Add a New Task</div> 
+    </div>
+  `;
+
+  taskContainer.insertAdjacentHTML("beforeend", htmlStringAddTaskButton);
+}
+
+function addListbutton(divParent) {
+  const htmlStringAddListButton = `
+    <div id="add-list-button">
+      <div class="plus-layout">+</div>  
+      <div class="add-label"> Add a New List</div> 
+    </div>
+  `;
+
+  divParent.insertAdjacentHTML("beforeend", htmlStringAddListButton);
+
+  const addListDom = document.getElementById("add-list-button");
+
+  addListDom.addEventListener("click", function () {
+    addSublistContainer(mainContent);
+    displayTaks();
+    addList("New Main Task", "Description");
+    const subListName = document.querySelector(".sub-list-name");
+    subListName.textContent = "New Main task";
+
+    const subListDescription = document.querySelector(".sub-list-description");
+    subListDescription.textContent = "Add a description";
+
+    divParent.appendChild(addListDom);
+  });
 }
 
 function addEmptyContent(divParent) {
@@ -111,7 +156,7 @@ function addEmptyContent(divParent) {
                     <div class="sub-empty-text">Click</div>
                     <div id="add-main-task">+</div>
                     <div class="sub-empty-text">to add one :)</div>
-                </div>
+                </div> 
             </div>`;
     // Récupérer le premier élément enfant (le .empty-container) de tempContainer
     const emptyContainer = tempContainer.firstElementChild;
@@ -124,10 +169,17 @@ function addEmptyContent(divParent) {
     addMaintaskButton.addEventListener("click", function () {
       removeEmptyContent();
       addSublistContainer(mainContent);
+      displayTaks();
       addList("New Main Task", "Description");
-      //   const ListName = infoproject[0];
-      //   const listDescription = infoproject[1];
-      //   const listId = infoproject[2];
+      const subListName = document.querySelector(".sub-list-name");
+      subListName.textContent = "New Main task";
+
+      const subListDescription = document.querySelector(
+        ".sub-list-description"
+      );
+      subListDescription.textContent = "Add a description";
+
+      addListbutton(mainContent);
     });
 
     return emptyContainer;
@@ -138,3 +190,30 @@ function removeEmptyContent() {
   const emptyContentContainer = document.querySelector(".empty-container");
   emptyContentContainer.remove();
 }
+
+function displayTaks() {
+  const displayTaskButtonContainer = document.querySelector(
+    ".sub-list-container-left"
+  );
+  const displayTaskButton = document.querySelector(".display-tasks");
+  if (displayTaskButton) {
+    let displayTaskButtonIsActive = true;
+
+    displayTaskButtonContainer.addEventListener("click", function () {
+      displayTaskButtonIsActive = !displayTaskButtonIsActive;
+      if (!displayTaskButtonIsActive) {
+        displayTaskButton.classList.add("down");
+      } else {
+        displayTaskButton.classList.remove("down");
+      }
+    });
+  }
+}
+
+const myProject = myProjectManager.getProjectById(1725142384056);
+myProject.addList("New Main Task-1", "Description-1");
+myProject.addList("New Main Task-2", "Description-2");
+myProject.addList("New Main Task-3", "Description-3");
+myProject.addList("New Main Task-4", "Description-4");
+
+console.log(myProject);

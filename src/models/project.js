@@ -26,6 +26,11 @@ export default class Project {
     return this.lists[index];
   }
 
+  // Récupérer une liste par ID
+  getListById(id) {
+    return this.lists.find((list) => list.id === id);
+  }
+
   updateList(index, upDatedData) {
     const list = this.lists[index];
     if (list) {
