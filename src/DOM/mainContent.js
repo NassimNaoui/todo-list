@@ -135,12 +135,17 @@ function addListbutton(divParent) {
   addListDom.addEventListener("click", function () {
     addSublistContainer(mainContent);
     displayTaks();
-    addList("New Main Task", "Description");
-    const subListName = document.querySelector(".sub-list-name");
-    subListName.textContent = "New Main task";
+    addList("New List", "Description");
 
-    const subListDescription = document.querySelector(".sub-list-description");
-    subListDescription.textContent = "Add a description";
+    const MainContentChildren = divParent.children;
+    let lenChildren = divParent.children.length;
+    const containerToChange = MainContentChildren[lenChildren - 1];
+    const containerFirstChild = containerToChange.children[0];
+    const containerSecondGrandChild = containerFirstChild.children[1];
+    const subListName = containerSecondGrandChild.children[0];
+    const subListDescription = containerSecondGrandChild.children[1];
+    subListName.textContent = "New List test";
+    subListDescription.textContent = "Add a description test";
 
     divParent.appendChild(addListDom);
   });
@@ -170,9 +175,9 @@ function addEmptyContent(divParent) {
       removeEmptyContent();
       addSublistContainer(mainContent);
       displayTaks();
-      addList("New Main Task", "Description");
+      addList("New List", "Description");
       const subListName = document.querySelector(".sub-list-name");
-      subListName.textContent = "New Main task";
+      subListName.textContent = "New List";
 
       const subListDescription = document.querySelector(
         ".sub-list-description"
@@ -211,9 +216,9 @@ function displayTaks() {
 }
 
 const myProject = myProjectManager.getProjectById(1725142384056);
-myProject.addList("New Main Task-1", "Description-1");
-myProject.addList("New Main Task-2", "Description-2");
-myProject.addList("New Main Task-3", "Description-3");
-myProject.addList("New Main Task-4", "Description-4");
+myProject.addList("New List 1", "Description 1");
+myProject.addList("New List 2", "Description 2");
+myProject.addList("New List 3", "Description 3");
+myProject.addList("New List 4", "Description 4");
 
 console.log(myProject);
