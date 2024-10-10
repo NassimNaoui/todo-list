@@ -1,3 +1,4 @@
+// import { List } from "./project";
 import Project from "./project";
 
 export default class ProjectManager {
@@ -61,13 +62,36 @@ export default class ProjectManager {
   }
 
   // Charger les projets depuis le localStorage
+  // loadProjectsFromLocalStorage() {
+  //   const savedProjects = localStorage.getItem("projects");
+  //   if (savedProjects) {
+  //     return JSON.parse(savedProjects).map(
+  //       (projectData) => new Project(projectData.projectName, projectData.id)
+  //     );
+  //   }
+  //   return [];
+  // }
+
   loadProjectsFromLocalStorage() {
     const savedProjects = localStorage.getItem("projects");
+
     if (savedProjects) {
-      return JSON.parse(savedProjects).map(
-        (projectData) => new Project(projectData.projectName, projectData.id)
-      );
+      return JSON.parse(savedProjects).map((projectData) => {
+        // Crée un nouvel objet Project
+        const project = new Project(projectData.projectName, projectData.id);
+
+        // Si le projet a des listes, recrée les objets List et les ajoute au projet
+        if (projectData.lists && Array.isArray(projectData.lists)) {
+          projectData.lists.forEach((listData) => {
+            // Crée une nouvelle liste
+            project.addList(listData.name, listData.description, listData.id); // Ajoute chaque liste au projet
+          });
+        }
+
+        return project; // Retourne le projet avec ses listes
+      });
     }
+
     return [];
   }
 }

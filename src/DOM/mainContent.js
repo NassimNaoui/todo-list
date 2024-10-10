@@ -9,10 +9,12 @@ function addList(listName, listDescription) {
   } else {
     const projectId = parseInt(mainContent.firstChild.id);
     const myProject = myProjectManager.getProjectById(projectId);
-
     const listId = Date.now();
     myProject.addList(listName, listDescription, listId);
+    myProjectManager.saveProjectsToLocalStorage();
     console.log(myProjectManager.getAllProjects());
+    console.log(myProject.getAllList());
+    console.log(myProject.getAllList().length);
   }
 }
 
@@ -45,7 +47,13 @@ export default function changeMainContent(page, id) {
         myProjectLists[i].name,
         myProjectLists[i].description
       );
+      const listInfosContainer = document.querySelectorAll(
+        ".sub-list-container-middle"
+      );
+      const array = Array.from(listInfosContainer);
+      array[i].id = myProjectLists[i].id;
     }
+    updateInfoListDOM();
     addListbutton(mainContent);
   }
 }
@@ -80,8 +88,10 @@ function addSublistContainer(divParent, name, description) {
         subSubdiv.classList.add(subSideContainer[1][j]);
         if (subSubdiv.className === "sub-list-name") {
           subSubdiv.textContent = name;
+          subSubdiv.contentEditable = "true";
         } else if (subSubdiv.className === "sub-list-description") {
           subSubdiv.textContent = description;
+          subSubdiv.contentEditable = "true";
         }
         subDiv.appendChild(subSubdiv);
       }
@@ -136,6 +146,11 @@ function addListbutton(divParent) {
     addSublistContainer(mainContent);
     displayTaks();
     addList("New List", "Description");
+    const projectId = parseInt(mainContent.firstChild.id);
+    const myProject = myProjectManager.getProjectById(projectId);
+
+    let lenList = myProject.getAllList().length;
+    const newList = myProject.getList(lenList - 1);
 
     const MainContentChildren = divParent.children;
     let lenChildren = divParent.children.length;
@@ -144,8 +159,11 @@ function addListbutton(divParent) {
     const containerSecondGrandChild = containerFirstChild.children[1];
     const subListName = containerSecondGrandChild.children[0];
     const subListDescription = containerSecondGrandChild.children[1];
-    subListName.textContent = "New List test";
-    subListDescription.textContent = "Add a description test";
+    subListName.textContent = newList.name;
+    subListDescription.textContent = newList.description;
+    containerSecondGrandChild.id = newList.id;
+
+    updateInfoListDOM();
 
     divParent.appendChild(addListDom);
   });
@@ -176,13 +194,22 @@ function addEmptyContent(divParent) {
       addSublistContainer(mainContent);
       displayTaks();
       addList("New List", "Description");
+      const projectId = parseInt(mainContent.firstChild.id);
+      const myProject = myProjectManager.getProjectById(projectId);
+      let lenList = myProject.getAllList().length;
+      const newList = myProject.getList(lenList - 1);
+
       const subListName = document.querySelector(".sub-list-name");
-      subListName.textContent = "New List";
+      subListName.textContent = newList.name;
 
       const subListDescription = document.querySelector(
         ".sub-list-description"
       );
-      subListDescription.textContent = "Add a description";
+      subListDescription.textContent = newList.description;
+
+      subListName.parentElement.id = newList.id;
+
+      updateInfoListDOM();
 
       addListbutton(mainContent);
     });
@@ -197,28 +224,70 @@ function removeEmptyContent() {
 }
 
 function displayTaks() {
-  const displayTaskButtonContainer = document.querySelector(
+  const displayTaskButtonContainer = document.querySelectorAll(
     ".sub-list-container-left"
-  );
+  ); // Sélectionner tous les éléments avec cette classe
   const displayTaskButton = document.querySelector(".display-tasks");
-  if (displayTaskButton) {
-    let displayTaskButtonIsActive = true;
+  let displayTaskButtonIsActive = true; // Déplacer cette ligne en dehors du if
 
-    displayTaskButtonContainer.addEventListener("click", function () {
-      displayTaskButtonIsActive = !displayTaskButtonIsActive;
-      if (!displayTaskButtonIsActive) {
-        displayTaskButton.classList.add("down");
-      } else {
-        displayTaskButton.classList.remove("down");
-      }
+  if (displayTaskButton) {
+    displayTaskButtonContainer.forEach((element) => {
+      element.addEventListener("click", function () {
+        displayTaskButtonIsActive = !displayTaskButtonIsActive;
+        if (!displayTaskButtonIsActive) {
+          displayTaskButton.classList.add("down");
+        } else {
+          displayTaskButton.classList.remove("down");
+        }
+      });
     });
   }
 }
 
-const myProject = myProjectManager.getProjectById(1725142384056);
-myProject.addList("New List 1", "Description 1");
-myProject.addList("New List 2", "Description 2");
-myProject.addList("New List 3", "Description 3");
-myProject.addList("New List 4", "Description 4");
+function updateInfoListDOM() {
+  // Sélectionne tous les éléments avec l'attribut contenteditable
+  const editableElements = document.querySelectorAll("[contenteditable]");
 
-console.log(myProject);
+  editableElements.forEach((element) => {
+    element.addEventListener("click", function () {
+      console.log(this.parentElement);
+      console.log("working");
+    });
+  });
+  // Ajoute un écouteur d'événements pour chaque élément éditable
+  editableElements.forEach((element) => {
+    element.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        element.blur();
+      }
+    });
+
+    // Ajoute un autre écouteur pour l'événement "blur" (quand l'élément perd le focus)
+    element.addEventListener("blur", function () {
+      const projectId = parseInt(mainContent.firstChild.id);
+      const myProject = myProjectManager.getProjectById(projectId);
+
+      const listId = parseInt(this.parentElement.id);
+      const list = myProject.getListById(listId);
+      let newName = "";
+      let newDescription = "";
+
+      if (element.className === "sub-list-name") {
+        newName = this.textContent;
+      } else if (element.className === "sub-list-description") {
+        newDescription = this.textContent;
+      }
+
+      const updatedData = { name: newName, description: newDescription };
+
+      myProject.updateList(list, updatedData);
+      myProjectManager.saveProjectsToLocalStorage();
+      console.log(myProject);
+      console.log(myProjectManager.getAllProjects());
+    });
+  });
+}
+
+const projects = myProjectManager.loadProjectsFromLocalStorage();
+console.log(projects);

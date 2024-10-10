@@ -256,6 +256,7 @@ main {
   padding: 20px;
   font-size: 3.8em;
   font-weight: 600;
+  cursor: default;
 }
 
 #main-container #main-content .sub-list-container {
@@ -307,16 +308,19 @@ main {
 
 .sub-list-name,
 .sub-list-description {
-  height: 50%;
-  align-content: first baseline;
+  width: 50%;
+  white-space: nowrap;
+  outline: none;
 }
 
 .sub-list-name {
+  height: 55%;
   font-size: 1.7em;
   font-weight: 500;
 }
 
 .sub-list-description {
+  height: 45%;
   font-size: 1.2em;
   font-weight: 200;
 }

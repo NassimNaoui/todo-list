@@ -3,31 +3,19 @@ import { myProjectManager } from "../models/projectManager";
 import { addOptionsIcon } from "../UI/imgUploader";
 import changeMainContent from "./mainContent";
 
-// const myProjectManager = new ProjectManager();
-
 // Function to add a new project
 function addNewProject(projectName) {
   const id = Date.now();
   myProjectManager.addProject(projectName, id);
-  saveProjectsToLocalStorage(); // Save to localStorage after adding
+  myProjectManager.saveProjectsToLocalStorage();
   return [projectName, id];
 }
 
-// Save projects to localStorage
-function saveProjectsToLocalStorage() {
-  console.log("Saving projects to localStorage");
-  localStorage.setItem(
-    "projects",
-    JSON.stringify(myProjectManager.getAllProjects())
-  );
-}
-
-// Load projects from localStorage
-function loadProjectsFromLocalStorage() {
-  console.log("Loading projects from localStorage");
-  const storedProjects = JSON.parse(localStorage.getItem("projects"));
-  if (storedProjects) {
-    storedProjects.forEach((project) => {
+function loadProjectsFromLocalStorageDOM() {
+  const projects = myProjectManager.loadProjectsFromLocalStorage();
+  console.log(projects);
+  if (projects) {
+    projects.forEach((project) => {
       addHtmlproject(project.projectName, project.id);
     });
   }
@@ -196,4 +184,4 @@ function getIndex(divId) {
 }
 
 // Load projects from localStorage when the DOM is fully loaded
-document.addEventListener("DOMContentLoaded", loadProjectsFromLocalStorage);
+document.addEventListener("DOMContentLoaded", loadProjectsFromLocalStorageDOM);
