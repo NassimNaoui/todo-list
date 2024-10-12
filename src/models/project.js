@@ -30,6 +30,19 @@ export default class Project {
     return this.lists.find((list) => list.id === id);
   }
 
+  getIndexlist(id) {
+    const list = this.getListById(id); // Récupérer la liste par ID
+    if (list) {
+      // Vérifier si la liste existe
+      for (let i = 0; i < this.lists.length; i++) {
+        if (this.lists[i].id === list.id) {
+          return i;
+        }
+      }
+    }
+    return -1; // Retourner -1 si la liste n'est pas trouvée
+  }
+
   updateList(list, upDatedData) {
     if (list) {
       if (upDatedData.name) {

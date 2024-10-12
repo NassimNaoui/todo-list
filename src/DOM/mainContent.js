@@ -101,19 +101,18 @@ function addSublistContainer(divParent, name, description) {
     }
   }
 
-  // Adding 2 children into the iconContainer
-  const iconContainer = document.createElement("div");
-  iconContainer.id = "options-icon";
-  iconContainer.className = "icon";
-
-  addOptionsIcon(iconContainer);
+  const containerRight = document.querySelectorAll(".sub-list-container-right");
 
   const htmlStringCard = `
-        <div id="options-card">
-            <ul id="rename-option">Rename</ul>
-            <ul id="delete-option">Delete</ul>
+        <div id="delete-list">
+            <div class="delete-button">X</div>
         </div>`;
-  subListLayout.insertAdjacentHTML("beforeend", htmlStringCard);
+
+  containerRight.forEach((element) => {
+    if (!element.querySelector("#delete-list")) {
+      element.insertAdjacentHTML("afterbegin", htmlStringCard);
+    }
+  });
 
   // Ajout du container pour les tâches
   const taskContainer = document.createElement("div");
@@ -248,12 +247,6 @@ function updateInfoListDOM() {
   // Sélectionne tous les éléments avec l'attribut contenteditable
   const editableElements = document.querySelectorAll("[contenteditable]");
 
-  editableElements.forEach((element) => {
-    element.addEventListener("click", function () {
-      console.log(this.parentElement);
-      console.log("working");
-    });
-  });
   // Ajoute un écouteur d'événements pour chaque élément éditable
   editableElements.forEach((element) => {
     element.addEventListener("keydown", function (event) {
@@ -285,6 +278,46 @@ function updateInfoListDOM() {
       myProjectManager.saveProjectsToLocalStorage();
       console.log(myProject);
       console.log(myProjectManager.getAllProjects());
+    });
+  });
+  deleteListDOM();
+}
+
+function deleteListDOM() {
+  const deleteButtons = document.querySelectorAll("#delete-list");
+
+  deleteButtons.forEach((element) => {
+    element.addEventListener("click", function () {
+      // Vérifie si le bouton a déjà été cliqué via un attribut "data-clicked"
+      if (element.getAttribute("data-clicked") === "true") return;
+
+      const projectId = parseInt(mainContent.firstChild.id);
+      const myProject = myProjectManager.getProjectById(projectId);
+
+      const grandParent = this.parentElement.parentElement;
+      const listElement = grandParent.children[1];
+
+      if (!listElement || !listElement.id) {
+        console.log("Erreur : Aucun ID trouvé pour l'élément liste.");
+        return;
+      }
+
+      const listId = parseInt(listElement.id);
+
+      const indexList = myProject.getIndexlist(listId);
+
+      if (indexList >= 0) {
+        myProject.removeList(indexList);
+        myProjectManager.saveProjectsToLocalStorage();
+
+        // Supprimer l'élément parent de la carte actuelle du DOM
+        grandParent.parentElement.remove();
+
+        // Marque ce bouton comme ayant été cliqué
+        element.setAttribute("data-clicked", "true");
+      } else {
+        console.log(`Erreur : Liste non trouvée pour l'ID ${listId}`);
+      }
     });
   });
 }
