@@ -1,11 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTD</title>
-<script defer src="main.js"></script></head>
-<body>
-    
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Getting Things Done</title>
+  <script defer src="main.js"></script></head>
+  <body>
+    <div id="container">
+      <aside>
+        <div id="section-top">
+          <div id="user-container">
+            <div class="user-image"></div>
+            <div class="user-name">Odinite</div>
+          </div>
+        </div>
+        <div id="section-mid">
+          <div class="section">
+            <div id="today-icon" class="icon"></div>
+            <div class="title">Today</div>
+          </div>
+          <div class="section">
+            <div id="calendar-icon" class="icon"></div>
+            <div class="title">Upcoming</div>
+          </div>
+          <div class="section">
+            <div id="someday-icon" class="icon"></div>
+            <div class="title">Someday</div>
+          </div>
+          <div class="section">
+            <div id="done-icon" class="icon"></div>
+            <div class="title">Done</div>
+          </div>
+        </div>
+        <div id="section-bottom">
+          <div id="content">
+            <div class="list-container-title">
+              <div>My pages</div>
+              <div id="add-icon" class="icon"></div>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <main>
+        <div id="main-container">
+          <div id="main-content"></div>
+        </div>
+      </main>
+    </div>
+  </body>
 </html>
