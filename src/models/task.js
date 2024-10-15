@@ -1,6 +1,7 @@
 export default class Task {
-  constructor(title, note, priority, date) {
+  constructor(title, id, note, priority, date) {
     (this.title = title),
+      (this.id = id),
       (this.note = note),
       this.setPriority(priority),
       (this.date = date),
@@ -8,7 +9,7 @@ export default class Task {
   }
 
   setPriority(priority) {
-    const validProperties = ["low", "medium", "high"];
+    const validProperties = ["Low", "Medium", "High"];
     if (!validProperties.includes(priority)) {
       throw new Error(`Priority must be one of: ${validProperties.join(", ")}`);
     }

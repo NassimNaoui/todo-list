@@ -50,8 +50,36 @@ export default function changeMainContent(page, id) {
       const listInfosContainer = document.querySelectorAll(
         ".sub-list-container-middle"
       );
-      const array = Array.from(listInfosContainer);
-      array[i].id = myProjectLists[i].id;
+      const arrayList = Array.from(listInfosContainer);
+      arrayList[i].id = myProjectLists[i].id;
+      const parentDiv = arrayList[i].parentElement;
+      const grandParent = parentDiv.parentElement;
+      const taskcontainer = grandParent.children[1];
+
+      const htmlStringTableHeader = `
+        <div class="table-header">
+          <div class="table-label" id="name">Name</div>  
+          <div class="table-label" id="note">Note</div>
+          <div class="table-label" id="priority">Priority</div>  
+          <div class="table-label" id="date">Date</div> 
+          <div class="table-label" id="status">Status</div>   
+        </div>
+      `;
+
+      const listTasks = myProjectLists[i].getAllTasks();
+      const taskIndex = listTasks.length;
+      console.log(taskIndex);
+
+      for (let j = 0; j < taskIndex; j++) {
+        loadTaskDom(
+          taskcontainer,
+          listTasks[j].title,
+          listTasks[j].note,
+          listTasks[j].priority,
+          listTasks[j].status
+        );
+      }
+      taskcontainer.insertAdjacentHTML("afterbegin", htmlStringTableHeader);
     }
     updateInfoListDOM();
     addListbutton(mainContent);
@@ -326,9 +354,6 @@ function deleteListDOM() {
   });
 }
 
-const projects = myProjectManager.loadProjectsFromLocalStorage();
-console.log(projects);
-
 function addTaskDOM() {
   const addTaskButton = document.querySelectorAll("#add-task-button");
 
@@ -344,50 +369,63 @@ function addTaskDOM() {
 
   const htmlStringTableRow = `
   <div class="table-row">
-    <div class="task-name" contenteditable="true"></div>  
-    <div class="task-note" contenteditable="true"></div>
+    <div class="task-name-container">
+      <div class="task-name" contenteditable="true"></div>  
+    </div>  
+    <div class="task-note-container">
+      <div class="task-note" contenteditable="true"></div>
+    </div>
     <div class="task-priority">
-      <div id="priority-value">Low</div>
+      <div id="priority-value" class="option-Low">Low</div>
       <div class="priority-options">
         <div class="priority-label">
-          <div id="Low">Low</div>
+          <div class="option-Low">Low</div>
         </div>
         <div class="priority-label">
-          <div id="Medium">Medium</div>
+          <div class="option-Medium">Medium</div>
         </div>
         <div class="priority-label">
-          <div id="High">High</div>
+          <div class="option-High">High</div>
         </div>
       </div>
     </div>
     <input type="date" class="task-date"></input> 
-    <div class="task-status">
+    <div class="task-status-container">
       <input type="checkbox" class="task-status"></input>  
     </div>
   </div>
-`;
+  `;
 
   function displayPriorities() {
     const priorityButtons = document.querySelectorAll(".task-priority");
 
     priorityButtons.forEach((element) => {
-      // Initialiser l'état cliqué avec un attribut de données
-      element.setAttribute("data-clicked", "false");
+      let isClicked = false; // Variable locale pour suivre l'état du bouton
 
       element.addEventListener("click", function () {
-        const optionCard = this.children[1]; // Cibler le deuxième enfant directement
+        const priorityValue = this.children[0];
+        const optionCard = this.children[1];
 
-        // Récupérer l'état actuel depuis l'attribut de données
-        const clicked = this.getAttribute("data-clicked") === "true";
-
-        // Afficher ou masquer l'optionCard en fonction de l'état
-        if (!clicked) {
-          optionCard.style.display = "flex"; // Affiche l'optionCard
-          this.setAttribute("data-clicked", "true"); // Met à jour l'état à "true"
+        if (!isClicked) {
+          optionCard.style.display = "flex";
+          updatepriorities(optionCard, priorityValue);
+          isClicked = true; // Met à jour l'état à "true"
         } else {
-          optionCard.style.display = "none"; // Masque l'optionCard
-          this.setAttribute("data-clicked", "false"); // Met à jour l'état à "false"
+          optionCard.style.display = "none";
+          isClicked = false; // Réinitialise l'état à "false"
         }
+      });
+    });
+  }
+
+  function updatepriorities(container, value) {
+    const options = container.querySelectorAll(".priority-label");
+
+    options.forEach((element) => {
+      element.addEventListener("click", () => {
+        const optionselected = element.firstElementChild.textContent;
+        value.textContent = optionselected;
+        value.classList = `option-${optionselected}`;
       });
     });
   }
@@ -413,3 +451,74 @@ function addTaskDOM() {
     });
   });
 }
+
+function loadTaskDom(divParent, name, note, priority, date, status) {
+  const htmlStringTableRow = `
+  <div class="table-row">
+    <div class="task-name-container">
+      <div class="task-name" contenteditable="true">${name}</div>  
+    </div>  
+    <div class="task-note-container">
+      <div class="task-note" contenteditable="true">${note}</div>
+    </div>
+    <div class="task-priority">
+      <div id="priority-value" class="option-Low">${priority}</div>
+      <div class="priority-options">
+        <div class="priority-label">
+          <div class="option-Low">Low</div>
+        </div>
+        <div class="priority-label">
+          <div class="option-Medium">Medium</div>
+        </div>
+        <div class="priority-label">
+          <div class="option-High">High</div>
+        </div>
+      </div>
+    </div>
+    <input type="date" class="task-date">${date}</input> 
+    <div class="task-status-container">
+      <input type="checkbox" class="task-status" ${status}></input>  
+    </div>
+  </div>
+  `;
+
+  divParent.insertAdjacentHTML("afterbegin", htmlStringTableRow);
+
+  const priorityButtons = document.querySelectorAll(".task-priority");
+
+  priorityButtons.forEach((element) => {
+    let isClicked = false; // Variable locale pour suivre l'état du bouton
+
+    element.addEventListener("click", function () {
+      const priorityValue = this.children[0];
+      const optionCard = this.children[1];
+
+      if (!isClicked) {
+        optionCard.style.display = "flex";
+        updatepriorities(optionCard, priorityValue);
+        isClicked = true; // Met à jour l'état à "true"
+      } else {
+        optionCard.style.display = "none";
+        isClicked = false; // Réinitialise l'état à "false"
+      }
+    });
+  });
+
+  function updatepriorities(container, value) {
+    const options = container.querySelectorAll(".priority-label");
+
+    options.forEach((element) => {
+      element.addEventListener("click", () => {
+        const optionselected = element.firstElementChild.textContent;
+        value.textContent = optionselected;
+        value.classList = `option-${optionselected}`;
+      });
+    });
+  }
+}
+
+const myProject = myProjectManager.getProjectById(1728540471487);
+const myList = myProject.getListById(1728975362046);
+myList.addTask("Titre", Date.now(), "Note", "Low", "", false);
+myList.addTask("Titre-2", Date.now(), "Note-2", "Low", "", false);
+console.log(myList);
