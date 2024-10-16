@@ -16,8 +16,8 @@ export default class List {
     this.description = newDescription;
   }
 
-  addTask(title, note, priority, date) {
-    const newTask = new Task(title, note, priority, date);
+  addTask(title, id, note, priority, date, status) {
+    const newTask = new Task(title, id, note, priority, date, status);
     this.tasks.push(newTask);
   }
 

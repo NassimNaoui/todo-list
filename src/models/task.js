@@ -1,11 +1,11 @@
 export default class Task {
-  constructor(title, id, note, priority, date) {
+  constructor(title, id, note, priority, date, status) {
     (this.title = title),
       (this.id = id),
       (this.note = note),
       this.setPriority(priority),
       (this.date = date),
-      (this.status = false);
+      (this.status = status);
   }
 
   setPriority(priority) {

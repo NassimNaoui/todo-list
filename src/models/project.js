@@ -14,6 +14,7 @@ export default class Project {
   addList(name, description, id) {
     const newList = new List(name, description, id);
     this.lists.push(newList);
+    return newList;
   }
 
   removeList(index) {

@@ -1,4 +1,5 @@
 import { addOptionsIcon } from "../UI/imgUploader";
+import { format, parseISO } from "date-fns";
 import { myProjectManager } from "../models/projectManager";
 
 const mainContent = document.getElementById("main-content");
@@ -29,7 +30,7 @@ export default function changeMainContent(page, id) {
   const myProjectLists = myProject.getAllList();
   const listsIndex = myProjectLists.length;
 
-  if (mainContent.firstChild?.textContent === page) {
+  if (mainContent.firstChild?.id === id) {
     return; // Si le contenu actuel est déjà la bonne page, on ne fait rien
   }
 
@@ -68,22 +69,26 @@ export default function changeMainContent(page, id) {
 
       const listTasks = myProjectLists[i].getAllTasks();
       const taskIndex = listTasks.length;
-      console.log(taskIndex);
 
-      for (let j = 0; j < taskIndex; j++) {
-        loadTaskDom(
-          taskcontainer,
-          listTasks[j].title,
-          listTasks[j].note,
-          listTasks[j].priority,
-          listTasks[j].status
-        );
+      if (taskIndex >= 1) {
+        for (let j = 0; j < taskIndex; j++) {
+          loadTaskDom(
+            taskcontainer,
+            listTasks[j].title,
+            listTasks[j].id,
+            listTasks[j].note,
+            listTasks[j].priority,
+            listTasks[j].date,
+            listTasks[j].status
+          );
+        }
+        taskcontainer.insertAdjacentHTML("afterbegin", htmlStringTableHeader);
       }
-      taskcontainer.insertAdjacentHTML("afterbegin", htmlStringTableHeader);
     }
     updateInfoListDOM();
     addListbutton(mainContent);
     addTaskDOM();
+    displayTaks();
   }
 }
 
@@ -110,6 +115,7 @@ function addSublistContainer(divParent, name, description) {
     subListLayout.appendChild(subDiv);
     if (i === 0) {
       subSubdiv.classList.add(subSideContainer[0]);
+      subSubdiv.classList.add();
       subDiv.appendChild(subSubdiv);
     } else if (i === 1) {
       for (let j = 0; j < subSideContainer[1].length; j++) {
@@ -221,6 +227,7 @@ function addEmptyContent(divParent) {
     addMaintaskButton.addEventListener("click", function () {
       removeEmptyContent();
       addSublistContainer(mainContent);
+      addTaskDOM();
       displayTaks();
       addList("New List", "Description");
       const projectId = parseInt(mainContent.firstChild.id);
@@ -255,22 +262,23 @@ function removeEmptyContent() {
 function displayTaks() {
   const displayTaskButtonContainer = document.querySelectorAll(
     ".sub-list-container-left"
-  ); // Sélectionner tous les éléments avec cette classe
-  const displayTaskButton = document.querySelector(".display-tasks");
-  let displayTaskButtonIsActive = true; // Déplacer cette ligne en dehors du if
+  );
 
-  if (displayTaskButton) {
-    displayTaskButtonContainer.forEach((element) => {
-      element.addEventListener("click", function () {
-        displayTaskButtonIsActive = !displayTaskButtonIsActive;
-        if (!displayTaskButtonIsActive) {
-          displayTaskButton.classList.add("down");
-        } else {
-          displayTaskButton.classList.remove("down");
-        }
-      });
+  let displayTaskButtonIsActive = true;
+
+  displayTaskButtonContainer.forEach((element) => {
+    element.addEventListener("click", function () {
+      const displayTaskButton = this.firstChild;
+      const taskContainer = "";
+      displayTaskButtonIsActive = !displayTaskButtonIsActive;
+
+      if (!displayTaskButtonIsActive) {
+        displayTaskButton.classList.add("off");
+      } else {
+        displayTaskButton.classList.remove("off");
+      }
     });
-  }
+  });
 }
 
 function updateInfoListDOM() {
@@ -435,16 +443,27 @@ function addTaskDOM() {
       if (element.getAttribute("data-clicked") === "true") return;
 
       const taskContainer = this.parentElement;
+      const listContainer = taskContainer.parentElement;
+      const ListLayout = listContainer.children[0];
       const childrenContainer = taskContainer.children;
       const taskContainerLength = childrenContainer.length;
+
+      const projectId = parseInt(mainContent.firstChild.id);
+      const myProject = myProjectManager.getProjectById(projectId);
+      const listId = parseInt(ListLayout.children[1].id);
+      const myList = myProject.getListById(listId);
 
       if (taskContainerLength == 1) {
         taskContainer.insertAdjacentHTML("afterbegin", htmlStringTableHeader);
         taskContainer.insertAdjacentHTML("beforeend", htmlStringTableRow);
+        myList.addTask("New Task", Date.now(), "Note", "Low", "", false);
+        myProjectManager.saveProjectsToLocalStorage();
         displayPriorities();
         taskContainer.appendChild(element);
       } else if (taskContainerLength >= 2) {
         taskContainer.insertAdjacentHTML("beforeend", htmlStringTableRow);
+        myList.addTask("New Task", Date.now(), "Note", "Low", "", false);
+        myProjectManager.saveProjectsToLocalStorage();
         displayPriorities();
         taskContainer.appendChild(element);
       }
@@ -452,9 +471,18 @@ function addTaskDOM() {
   });
 }
 
-function loadTaskDom(divParent, name, note, priority, date, status) {
+function loadTaskDom(divParent, name, id, note, priority, date, status) {
+  let formattedDate = "";
+
+  if (date) {
+    formattedDate =
+      typeof date === "string"
+        ? format(parseISO(date), "yyyy-MM-dd")
+        : format(new Date(date), "yyyy-MM-dd");
+  }
+
   const htmlStringTableRow = `
-  <div class="table-row">
+  <div class="table-row" id="${id}">
     <div class="task-name-container">
       <div class="task-name" contenteditable="true">${name}</div>  
     </div>  
@@ -462,7 +490,7 @@ function loadTaskDom(divParent, name, note, priority, date, status) {
       <div class="task-note" contenteditable="true">${note}</div>
     </div>
     <div class="task-priority">
-      <div id="priority-value" class="option-Low">${priority}</div>
+      <div id="priority-value" class="option-${priority}">${priority}</div>
       <div class="priority-options">
         <div class="priority-label">
           <div class="option-Low">Low</div>
@@ -475,9 +503,9 @@ function loadTaskDom(divParent, name, note, priority, date, status) {
         </div>
       </div>
     </div>
-    <input type="date" class="task-date">${date}</input> 
+    <input type="date" class="task-date" value="${formattedDate}">
     <div class="task-status-container">
-      <input type="checkbox" class="task-status" ${status}></input>  
+      <input type="checkbox" class="task-status" ${status ? "checked" : ""}>
     </div>
   </div>
   `;
@@ -516,9 +544,3 @@ function loadTaskDom(divParent, name, note, priority, date, status) {
     });
   }
 }
-
-const myProject = myProjectManager.getProjectById(1728540471487);
-const myList = myProject.getListById(1728975362046);
-myList.addTask("Titre", Date.now(), "Note", "Low", "", false);
-myList.addTask("Titre-2", Date.now(), "Note-2", "Low", "", false);
-console.log(myList);

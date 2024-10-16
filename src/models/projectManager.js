@@ -1,4 +1,4 @@
-// import { List } from "./project";
+// import List from "./list";
 import Project from "./project";
 
 export default class ProjectManager {
@@ -61,34 +61,44 @@ export default class ProjectManager {
     localStorage.setItem("projects", JSON.stringify(this.projects));
   }
 
-  // Charger les projets depuis le localStorage
-  // loadProjectsFromLocalStorage() {
-  //   const savedProjects = localStorage.getItem("projects");
-  //   if (savedProjects) {
-  //     return JSON.parse(savedProjects).map(
-  //       (projectData) => new Project(projectData.projectName, projectData.id)
-  //     );
-  //   }
-  //   return [];
-  // }
-
   loadProjectsFromLocalStorage() {
     const savedProjects = localStorage.getItem("projects");
 
     if (savedProjects) {
       return JSON.parse(savedProjects).map((projectData) => {
         // Crée un nouvel objet Project
+        console.log(projectData);
         const project = new Project(projectData.projectName, projectData.id);
 
         // Si le projet a des listes, recrée les objets List et les ajoute au projet
         if (projectData.lists && Array.isArray(projectData.lists)) {
           projectData.lists.forEach((listData) => {
-            // Crée une nouvelle liste
-            project.addList(listData.name, listData.description, listData.id); // Ajoute chaque liste au projet
+            // Vérifie que listData a bien la structure correcte
+
+            // Ajoute la liste au projet avec les propriétés correctes
+            const list = project.addList(
+              listData.name,
+              listData.description,
+              listData.id
+            );
+
+            // Si la liste a des tâches, recrée les objets Task et les ajoute à la liste
+            if (listData.tasks && Array.isArray(listData.tasks)) {
+              listData.tasks.forEach((taskData) => {
+                list.addTask(
+                  taskData.title,
+                  taskData.id,
+                  taskData.note,
+                  taskData.priority,
+                  taskData.date,
+                  taskData.status
+                );
+              });
+            }
           });
         }
 
-        return project; // Retourne le projet avec ses listes
+        return project; // Retourne le projet avec ses listes et tâches
       });
     }
 
