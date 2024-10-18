@@ -455,7 +455,7 @@ main {
 .table-header,
 .table-row {
   display: grid;
-  grid-template-columns: 3fr 3fr 2fr 2fr 1fr;
+  grid-template-columns: 3fr 3fr 2fr 1fr 0.5fr 0.5fr;
   border-top: 0.1px solid #e9e9e7;
 }
 
@@ -469,10 +469,12 @@ main {
 #note,
 #priority,
 #date,
+#status,
 .table-row .task-name-container,
 .task-note-container,
 .task-priority,
-.task-date {
+.task-date,
+.task-status-container {
   border-right: 0.1px solid #e9e9e7;
 }
 
@@ -522,8 +524,7 @@ input[type="date" i] {
   flex-direction: column;
   position: absolute;
   width: 100px;
-  left: 65%;
-  transform: translateX(-50%); /* Ajustement pour centrer parfaitement */
+  transform: translateX(50%); /* Ajustement pour centrer parfaitement */
   background-color: white;
   padding: 1px;
   border: 1px solid #e9e9e7;
@@ -566,4 +567,35 @@ input[type="date" i] {
 .option-High {
   background-color: #ffe2dd;
   color: #766865;
+}
+
+.trash-icon-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.trash-icon {
+  height: 16px;
+  width: 16px;
+}
+
+.label-trash-icon {
+  display: none;
+  padding: 2.5px;
+  font-size: 0.8em;
+  text-align: center;
+  background-color: rgba(21, 20, 20, 0.711);
+  color: white;
+  border-radius: 5px;
+  position: absolute;
+  transform: translateX(-50%);
+  transform: translateY(95%);
+  z-index: 1;
+}
+
+.trash-icon-container:hover .label-trash-icon {
+  display: block;
 }

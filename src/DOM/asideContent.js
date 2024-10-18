@@ -7,6 +7,7 @@ import changeMainContent from "./mainContent";
 function addNewProject(projectName) {
   const id = Date.now();
   myProjectManager.addProject(projectName, id);
+
   myProjectManager.saveProjectsToLocalStorage();
   return [projectName, id];
 }

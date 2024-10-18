@@ -31,6 +31,23 @@ export default class List {
     return this.tasks[index];
   }
 
+  getTaskById(id) {
+    return this.tasks.find((task) => task.id === id);
+  }
+
+  getIndexTask(id) {
+    const task = this.getTaskById(id); // Récupérer la liste par ID
+    if (task) {
+      // Vérifier si la liste existe
+      for (let i = 0; i < this.tasks.length; i++) {
+        if (this.tasks[i].id === task.id) {
+          return i;
+        }
+      }
+    }
+    return -1; // Retourner -1 si la liste n'est pas trouvée
+  }
+
   updateTask(index, updatedData) {
     const task = this.tasks[index];
     if (task) {

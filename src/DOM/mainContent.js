@@ -1,4 +1,5 @@
 import { addOptionsIcon } from "../UI/imgUploader";
+import { addTrashIcon } from "../UI/imgUploader";
 import { format, parseISO } from "date-fns";
 import { myProjectManager } from "../models/projectManager";
 
@@ -264,18 +265,29 @@ function displayTaks() {
     ".sub-list-container-left"
   );
 
-  let displayTaskButtonIsActive = true;
-
   displayTaskButtonContainer.forEach((element) => {
     element.addEventListener("click", function () {
       const displayTaskButton = this.firstChild;
-      const taskContainer = "";
+      let displayTaskButtonIsActive = "";
+
+      if (displayTaskButton.className === "display-tasks") {
+        displayTaskButtonIsActive = true;
+      } else {
+        displayTaskButtonIsActive = false;
+      }
+
+      const listLayout = this.parentElement;
+      const ListContainer = listLayout.parentElement;
+      const taskContainer = ListContainer.children[1];
+
       displayTaskButtonIsActive = !displayTaskButtonIsActive;
 
       if (!displayTaskButtonIsActive) {
         displayTaskButton.classList.add("off");
+        taskContainer.style.display = "none";
       } else {
         displayTaskButton.classList.remove("off");
+        taskContainer.style.display = "flex";
       }
     });
   });
@@ -371,38 +383,44 @@ function addTaskDOM() {
       <div class="table-label" id="note">Note</div>
       <div class="table-label" id="priority">Priority</div>  
       <div class="table-label" id="date">Date</div> 
-      <div class="table-label" id="status">Status</div>   
+      <div class="table-label" id="status">Status</div>
+      <div></div> 
     </div>
   `;
 
-  const htmlStringTableRow = `
-  <div class="table-row">
-    <div class="task-name-container">
-      <div class="task-name" contenteditable="true"></div>  
-    </div>  
-    <div class="task-note-container">
-      <div class="task-note" contenteditable="true"></div>
-    </div>
-    <div class="task-priority">
-      <div id="priority-value" class="option-Low">Low</div>
-      <div class="priority-options">
-        <div class="priority-label">
-          <div class="option-Low">Low</div>
-        </div>
-        <div class="priority-label">
-          <div class="option-Medium">Medium</div>
-        </div>
-        <div class="priority-label">
-          <div class="option-High">High</div>
+  function addRowwithId(container, id) {
+    const htmlStringTableRow = `
+    <div class="table-row" id="${id}">
+      <div class="task-name-container">
+        <div class="task-name" contenteditable="true">New Task</div>  
+      </div>  
+      <div class="task-note-container">
+        <div class="task-note" contenteditable="true">New Note</div>
+      </div>
+      <div class="task-priority">
+        <div id="priority-value" class="option-Low">Low</div>
+        <div class="priority-options">
+          <div class="priority-label">
+            <div class="option-Low">Low</div>
+          </div>
+          <div class="priority-label">
+            <div class="option-Medium">Medium</div>
+          </div>
+          <div class="priority-label">
+            <div class="option-High">High</div>
+          </div>
         </div>
       </div>
+      <input type="date" class="task-date"></input> 
+      <div class="task-status-container">
+        <input type="checkbox" class="task-status"></input>  
+      </div>
+      <div class="trash-icon-container"></div>
     </div>
-    <input type="date" class="task-date"></input> 
-    <div class="task-status-container">
-      <input type="checkbox" class="task-status"></input>  
-    </div>
-  </div>
-  `;
+    `;
+
+    container.insertAdjacentHTML("beforeend", htmlStringTableRow);
+  }
 
   function displayPriorities() {
     const priorityButtons = document.querySelectorAll(".task-priority");
@@ -439,9 +457,7 @@ function addTaskDOM() {
   }
 
   addTaskButton.forEach((element) => {
-    element.addEventListener("click", function () {
-      if (element.getAttribute("data-clicked") === "true") return;
-
+    element.addEventListener("click", function (event) {
       const taskContainer = this.parentElement;
       const listContainer = taskContainer.parentElement;
       const ListLayout = listContainer.children[0];
@@ -455,17 +471,33 @@ function addTaskDOM() {
 
       if (taskContainerLength == 1) {
         taskContainer.insertAdjacentHTML("afterbegin", htmlStringTableHeader);
-        taskContainer.insertAdjacentHTML("beforeend", htmlStringTableRow);
-        myList.addTask("New Task", Date.now(), "Note", "Low", "", false);
+
+        myList.addTask("New Task", Date.now(), "New Note", "Low", "", false);
         myProjectManager.saveProjectsToLocalStorage();
+        const allTasks = myList.getAllTasks();
+        const newTask = allTasks[allTasks.length - 1];
+        const newtaskId = newTask.id;
+
+        addRowwithId(taskContainer, newtaskId);
+        loadTrashIcon();
         displayPriorities();
+
         taskContainer.appendChild(element);
+        event.stopImmediatePropagation();
       } else if (taskContainerLength >= 2) {
-        taskContainer.insertAdjacentHTML("beforeend", htmlStringTableRow);
-        myList.addTask("New Task", Date.now(), "Note", "Low", "", false);
+        myList.addTask("New Task", Date.now(), "New Note", "Low", "", false);
         myProjectManager.saveProjectsToLocalStorage();
+
+        const allTasks = myList.getAllTasks();
+        const newTask = allTasks[allTasks.length - 1];
+        const newtaskId = newTask.id;
+
+        addRowwithId(taskContainer, newtaskId);
+        loadTrashIcon();
         displayPriorities();
+
         taskContainer.appendChild(element);
+        event.stopImmediatePropagation();
       }
     });
   });
@@ -507,10 +539,13 @@ function loadTaskDom(divParent, name, id, note, priority, date, status) {
     <div class="task-status-container">
       <input type="checkbox" class="task-status" ${status ? "checked" : ""}>
     </div>
+    <div class="trash-icon-container"></div>
   </div>
   `;
 
   divParent.insertAdjacentHTML("afterbegin", htmlStringTableRow);
+
+  loadTrashIcon();
 
   const priorityButtons = document.querySelectorAll(".task-priority");
 
@@ -543,4 +578,47 @@ function loadTaskDom(divParent, name, id, note, priority, date, status) {
       });
     });
   }
+}
+
+function loadTrashIcon(iconContainer) {
+  iconContainer = document.querySelectorAll(".trash-icon-container");
+
+  iconContainer.forEach((element) => {
+    addTrashIcon(element);
+    deleteTaskDOM(element);
+  });
+}
+
+function deleteTaskDOM(element) {
+  // const deleteTaskButton = document.querySelectorAll(".trash-icon-container");
+
+  element.addEventListener("click", (event) => {
+    const projectId = parseInt(mainContent.firstChild.id);
+    const myProject = myProjectManager.getProjectById(projectId);
+
+    const taskRow = element.parentElement;
+    const taskContainer = taskRow.parentElement;
+
+    const listContainer = taskContainer.parentElement;
+    const listLayout = listContainer.children[0];
+    const listId = parseInt(listLayout.children[1].id);
+
+    const myList = myProject.getListById(listId);
+
+    const taskId = parseInt(taskRow.id);
+    const myTask = myList.getTaskById(taskId);
+    const taskIndex = myList.getIndexTask(taskId);
+
+    myList.removeTask(taskIndex);
+    myProjectManager.saveProjectsToLocalStorage();
+
+    if (taskContainer.children.length === 3) {
+      taskContainer.children[0].remove();
+      taskRow.remove();
+    } else {
+      taskRow.remove();
+    }
+
+    event.stopImmediatePropagation();
+  });
 }
