@@ -43,7 +43,7 @@ const addIconContainer = document.getElementById("add-icon");
 addIconContainer.appendChild(imageAdd);
 
 const titleAddIcon = document.createElement("div");
-titleAddIcon.textContent = "Add new list";
+titleAddIcon.textContent = "Add new page";
 titleAddIcon.classList.add("hover-text");
 addIconContainer.appendChild(titleAddIcon);
 

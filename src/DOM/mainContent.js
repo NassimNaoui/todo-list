@@ -435,10 +435,10 @@ function addTaskDOM() {
         if (!isClicked) {
           optionCard.style.display = "flex";
           updatepriorities(optionCard, priorityValue);
-          isClicked = true; // Met à jour l'état à "true"
+          isClicked = true;
         } else {
           optionCard.style.display = "none";
-          isClicked = false; // Réinitialise l'état à "false"
+          isClicked = false;
         }
       });
     });
@@ -452,6 +452,23 @@ function addTaskDOM() {
         const optionselected = element.firstElementChild.textContent;
         value.textContent = optionselected;
         value.classList = `option-${optionselected}`;
+
+        const priorityOptionContainer = element.parentElement;
+        const priorityContainer = priorityOptionContainer.parentElement;
+        const tableRow = priorityContainer.parentElement;
+        const taskId = parseInt(tableRow.id);
+        const taskContainer = tableRow.parentElement;
+        const listContainer = taskContainer.parentElement;
+        const listLayout = listContainer.children[0];
+        const listId = parseInt(listLayout.children[1].id);
+        const projectId = parseInt(mainContent.firstChild.id);
+        const myProject = myProjectManager.getProjectById(projectId);
+        const myList = myProject.getListById(listId);
+        const myTaskIndex = myList.getIndexTask(taskId);
+
+        myList.updateTask(myTaskIndex, { priority: value.textContent });
+        myProjectManager.saveProjectsToLocalStorage();
+        console.log(myList);
       });
     });
   }
@@ -495,6 +512,7 @@ function addTaskDOM() {
         addRowwithId(taskContainer, newtaskId);
         loadTrashIcon();
         displayPriorities();
+        updateInfoTaskDOM();
 
         taskContainer.appendChild(element);
         event.stopImmediatePropagation();
@@ -546,6 +564,7 @@ function loadTaskDom(divParent, name, id, note, priority, date, status) {
   divParent.insertAdjacentHTML("afterbegin", htmlStringTableRow);
 
   loadTrashIcon();
+  updateInfoTaskDOM();
 
   const priorityButtons = document.querySelectorAll(".task-priority");
 
@@ -571,10 +590,27 @@ function loadTaskDom(divParent, name, id, note, priority, date, status) {
     const options = container.querySelectorAll(".priority-label");
 
     options.forEach((element) => {
-      element.addEventListener("click", () => {
+      element.addEventListener("click", (event) => {
         const optionselected = element.firstElementChild.textContent;
         value.textContent = optionselected;
         value.classList = `option-${optionselected}`;
+
+        const priorityOptionContainer = element.parentElement;
+        const priorityContainer = priorityOptionContainer.parentElement;
+        const tableRow = priorityContainer.parentElement;
+        const taskId = parseInt(tableRow.id);
+        const taskContainer = tableRow.parentElement;
+        const listContainer = taskContainer.parentElement;
+        const listLayout = listContainer.children[0];
+        const listId = parseInt(listLayout.children[1].id);
+        const projectId = parseInt(mainContent.firstChild.id);
+        const myProject = myProjectManager.getProjectById(projectId);
+        const myList = myProject.getListById(listId);
+        const myTaskIndex = myList.getIndexTask(taskId);
+
+        myList.updateTask(myTaskIndex, { priority: value.textContent });
+        myProjectManager.saveProjectsToLocalStorage();
+        console.log(myList);
       });
     });
   }
@@ -606,7 +642,7 @@ function deleteTaskDOM(element) {
     const myList = myProject.getListById(listId);
 
     const taskId = parseInt(taskRow.id);
-    const myTask = myList.getTaskById(taskId);
+    // const myTask = myList.getTaskById(taskId);
     const taskIndex = myList.getIndexTask(taskId);
 
     myList.removeTask(taskIndex);
@@ -620,5 +656,46 @@ function deleteTaskDOM(element) {
     }
 
     event.stopImmediatePropagation();
+  });
+}
+
+function updateInfoTaskDOM() {
+  const editableElements = document.querySelectorAll(
+    ".table-row [contenteditable]"
+  );
+
+  editableElements.forEach((element) => {
+    element.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        element.blur();
+      }
+    });
+
+    element.addEventListener("blur", function () {
+      const taskInfoContainer = element.parentElement;
+      const tableRow = taskInfoContainer.parentElement;
+      const taskId = parseInt(tableRow.id);
+
+      const taskContainer = tableRow.parentElement;
+      const listContainer = taskContainer.parentElement;
+      const listLayout = listContainer.children[0];
+      const listId = parseInt(listLayout.children[1].id);
+
+      const projectId = parseInt(mainContent.firstChild.id);
+      const myProject = myProjectManager.getProjectById(projectId);
+      const myList = myProject.getListById(listId);
+      const myTaskIndex = myList.getIndexTask(taskId);
+
+      if (element.className === "task-name") {
+        const newTitle = element.textContent;
+        myList.updateTask(myTaskIndex, { title: newTitle });
+        myProjectManager.saveProjectsToLocalStorage();
+      } else if (element.className === "task-note") {
+        const newNote = element.textContent;
+        myList.updateTask(myTaskIndex, { note: newNote });
+        myProjectManager.saveProjectsToLocalStorage();
+      }
+    });
   });
 }
