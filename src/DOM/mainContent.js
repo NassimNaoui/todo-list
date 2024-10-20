@@ -498,6 +498,7 @@ function addTaskDOM() {
         addRowwithId(taskContainer, newtaskId);
         loadTrashIcon();
         displayPriorities();
+        updateInfoTaskDOM();
 
         taskContainer.appendChild(element);
         event.stopImmediatePropagation();
@@ -642,7 +643,6 @@ function deleteTaskDOM(element) {
     const myList = myProject.getListById(listId);
 
     const taskId = parseInt(taskRow.id);
-    // const myTask = myList.getTaskById(taskId);
     const taskIndex = myList.getIndexTask(taskId);
 
     myList.removeTask(taskIndex);
@@ -696,6 +696,53 @@ function updateInfoTaskDOM() {
         myList.updateTask(myTaskIndex, { note: newNote });
         myProjectManager.saveProjectsToLocalStorage();
       }
+    });
+  });
+
+  const editableDate = document.querySelectorAll('input[type="date"]');
+
+  editableDate.forEach((element) => {
+    element.addEventListener("change", (event) => {
+      const tableRow = element.parentElement;
+      const taskId = parseInt(tableRow.id);
+
+      const taskContainer = tableRow.parentElement;
+      const listContainer = taskContainer.parentElement;
+      const listLayout = listContainer.children[0];
+      const listId = parseInt(listLayout.children[1].id);
+
+      const projectId = parseInt(mainContent.firstChild.id);
+      const myProject = myProjectManager.getProjectById(projectId);
+      const myList = myProject.getListById(listId);
+      const myTaskIndex = myList.getIndexTask(taskId);
+
+      myList.updateTask(myTaskIndex, { date: event.target.value });
+      myProjectManager.saveProjectsToLocalStorage();
+      event.stopImmediatePropagation();
+    });
+  });
+
+  const editableCheckBox = document.querySelectorAll('input[type="checkbox"]');
+
+  editableCheckBox.forEach((element) => {
+    element.addEventListener("change", (event) => {
+      const checkboxContainer = element.parentElement;
+      const tableRow = checkboxContainer.parentElement;
+      const taskId = parseInt(tableRow.id);
+
+      const taskContainer = tableRow.parentElement;
+      const listContainer = taskContainer.parentElement;
+      const listLayout = listContainer.children[0];
+      const listId = parseInt(listLayout.children[1].id);
+
+      const projectId = parseInt(mainContent.firstChild.id);
+      const myProject = myProjectManager.getProjectById(projectId);
+      const myList = myProject.getListById(listId);
+      const myTaskIndex = myList.getIndexTask(taskId);
+
+      myList.updateTask(myTaskIndex, { status: element.checked });
+      myProjectManager.saveProjectsToLocalStorage();
+      event.stopImmediatePropagation();
     });
   });
 }
